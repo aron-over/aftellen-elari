@@ -253,16 +253,16 @@
         for (var x = 0; x < W; x++) {
           var v = a[(y * W + x) * 4 + 3] / 255;
           if (v < 0.02) continue;
-          var p = smooth(0.03, 0.55, v);
+          var p = smooth(0.03, 0.97, v);
           if (p < Math.random()) continue;                          // sprayed edge
           var t = smooth(0.15, 0.85, ((x * dx + y * dy) - lo) / (hi - lo));
           var path = paths[t > Math.random() ? 1 : 0];              // grainy colour blend
-          if (v > 0.62) {                                           // deep inside: solid, hidden under dense dots
+          if (v > 0.985) {                                           // deep inside: solid, hidden under dense dots
             var c = path === paths[1] ? c2 : c1, i = (y * W + x) * 4;
             cp[i] = c[0]; cp[i + 1] = c[1]; cp[i + 2] = c[2]; cp[i + 3] = 255;
           } else {
-            var r = 0.62;                                            // every dot the same size
-            var cx = x + 0.5 + (Math.random() - 0.5) * 0.5, cy = y + 0.5 + (Math.random() - 0.5) * 0.5;
+            var r = (0.3 + 0.7 * p) * (0.8 + Math.random() * 0.4);  // dots grow and melt together towards the core
+            var cx = x + 0.5 + (Math.random() - 0.5) * 0.9, cy = y + 0.5 + (Math.random() - 0.5) * 0.9;
             path.moveTo(cx + r, cy);
             path.arc(cx, cy, r, 0, Math.PI * 2);
           }
