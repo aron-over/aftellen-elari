@@ -51,7 +51,6 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
-    image-rendering: pixelated;
   }
 
   main {
@@ -201,10 +200,10 @@
      fractions of the screen: [x, y, radius (relative to the height)]. */
   var SHAPES = {
     light: [
-      { from: '#FEFA7C', to: '#FEFA7C', dir: [-1, -0.4], circles: [[0.86, 0.98, 0.40], [1.02, 0.70, 0.30], [0.66, 1.14, 0.24]] }
+      { from: '#FEFA7C', to: '#FEFA7C', dir: [-1, -0.4], circles: [[0.90, 1.02, 0.36], [1.04, 0.74, 0.28], [0.70, 1.18, 0.22]] }
     ],
     dark: [
-      { from: '#FEFA7C', to: '#FEFA7C', dir: [-1, -0.4], circles: [[0.86, 0.98, 0.40], [1.02, 0.70, 0.30], [0.66, 1.14, 0.24]] }
+      { from: '#FEFA7C', to: '#FEFA7C', dir: [-1, -0.4], circles: [[0.90, 1.02, 0.36], [1.04, 0.74, 0.28], [0.70, 1.18, 0.22]] }
     ]
   };
 
@@ -213,11 +212,14 @@
 
   function drawSpray() {
     var canvas = $('spray');
-    var grain = Math.max(1, innerHeight / 540);      // size of one grain: 2px on a 1080p screen
+    if (!innerWidth || !innerHeight) return;         // hidden window: nothing to draw yet
+    var dpr = window.devicePixelRatio || 1;
+    var grain = Math.max(2, innerHeight / 300);      // spacing between dots in CSS pixels (3.6px at 1080p)
     var W = Math.ceil(innerWidth / grain), H = Math.ceil(innerHeight / grain);
-    canvas.width = W; canvas.height = H;
+    // Draw at full screen resolution so the dots stay round and sharp
+    canvas.width = Math.round(innerWidth * dpr); canvas.height = Math.round(innerHeight * dpr);
     var ctx = canvas.getContext('2d');
-    var out = ctx.createImageData(W, H), px = out.data;
+    ctx.setTransform(dpr * grain, 0, 0, dpr * grain, 0, 0);   // 1 unit = 1 grid cell
     var mask = document.createElement('canvas');
     mask.width = W; mask.height = H;
     var m = mask.getContext('2d');
@@ -226,7 +228,7 @@
       // Blurred mask via an offset shadow (works in every browser)
       m.clearRect(0, 0, W, H);
       m.shadowColor = '#fff';
-      m.shadowBlur = H * 0.16;
+      m.shadowBlur = H * 0.3;
       m.shadowOffsetX = W * 2;
       m.fillStyle = '#fff';
       shape.circles.forEach(function (c) {
@@ -235,7 +237,6 @@
         m.fill();
       });
       var a = m.getImageData(0, 0, W, H).data;
-      var c1 = hex(shape.from), c2 = hex(shape.to);
       var dx = shape.dir[0], dy = shape.dir[1], len = Math.hypot(dx, dy);
       dx /= len; dy /= len;
       // Range of the colour gradient across the shape
@@ -245,19 +246,35 @@
         lo = Math.min(lo, p - r); hi = Math.max(hi, p + r);
       });
 
+      // Sprayed edge as round dots (one path per colour); solid core as one smooth image
+      var paths = [new Path2D(), new Path2D()];
+      var core = m.createImageData(W, H), cp = core.data, c1 = hex(shape.from), c2 = hex(shape.to);
       for (var y = 0; y < H; y++) {
         for (var x = 0; x < W; x++) {
-          var i = (y * W + x) * 4;
-          var v = a[i + 3] / 255;
-          if (v < 0.03) continue;
-          if (smooth(0.08, 0.75, v) < Math.random()) continue;       // sprayed edge
+          var v = a[(y * W + x) * 4 + 3] / 255;
+          if (v < 0.02) continue;
+          var p = smooth(0.03, 0.55, v);
+          if (p < Math.random()) continue;                          // sprayed edge
           var t = smooth(0.15, 0.85, ((x * dx + y * dy) - lo) / (hi - lo));
-          var c = t > Math.random() ? c2 : c1;                    // grainy colour blend
-          px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255;
+          var path = paths[t > Math.random() ? 1 : 0];              // grainy colour blend
+          if (v > 0.62) {                                           // deep inside: solid, hidden under dense dots
+            var c = path === paths[1] ? c2 : c1, i = (y * W + x) * 4;
+            cp[i] = c[0]; cp[i + 1] = c[1]; cp[i + 2] = c[2]; cp[i + 3] = 255;
+          } else {
+            var r = 0.62;                                            // every dot the same size
+            var cx = x + 0.5 + (Math.random() - 0.5) * 0.5, cy = y + 0.5 + (Math.random() - 0.5) * 0.5;
+            path.moveTo(cx + r, cy);
+            path.arc(cx, cy, r, 0, Math.PI * 2);
+          }
         }
       }
+      m.shadowColor = 'transparent';
+      m.putImageData(core, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(mask, 0, 0);
+      ctx.fillStyle = shape.from; ctx.fill(paths[0]);
+      ctx.fillStyle = shape.to; ctx.fill(paths[1]);
     });
-    ctx.putImageData(out, 0, 0);
   }
   drawSpray();
   var resizeTimer;
