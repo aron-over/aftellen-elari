@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Countdown · Elari</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Elari design system — design.elari.nl */
+  :root {
+    --lilac: #CCB5FF;
+    --citrus: #FEFA7C;
+    --black: #000000;
+    --ink: #141414;
+    --white: #FFFFFF;
+
+    --bg: var(--lilac);
+    --fg: var(--ink);
+    --tile: var(--white);
+    --muted: #5c5c5c;
+    --accent-bg: var(--ink);
+    --accent-fg: var(--white);
+  }
+  :root[data-theme="dark"] {
+    --bg: var(--ink);
+    --fg: var(--white);
+    --tile: #242424;
+    --muted: #a3a3a3;
+    --accent-bg: var(--lilac);
+    --accent-fg: var(--black);
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.idle { cursor: none; }
+
+  /* Brand shape: organic shapes with a sprayed, grainy edge (drawn in the script below) */
+  #spray {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    image-rendering: pixelated;
+  }
+
+  main {
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 5vh 5vw;
+  }
+
+  .logo { height: 6vh; width: auto; color: var(--fg); }
+
+  .centre {
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    gap: 5vh;
+  }
+
+  h1 {
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: min(8vw, 13vh);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    max-width: 18ch;
+  }
+
+  .timer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2vw;
+  }
+  .unit {
+    background: var(--tile);
+    border-radius: min(2.4vw, 4vh);
+    padding: 3vh 2vw 3.5vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+  }
+  .unit:first-child { background: var(--accent-bg); color: var(--accent-fg); }
+  .unit:first-child .label { color: var(--accent-fg); opacity: .75; }
+
+  .value {
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: min(11vw, 22vh);
+    line-height: .95;
+    letter-spacing: -0.03em;
+    display: flex;
+  }
+  /* Fixed width per digit so nothing jumps around */
+  .value span { display: inline-block; width: .6em; text-align: center; }
+
+  .label {
+    font-size: min(1.8vw, 3.2vh);
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: lowercase;
+  }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    font-size: min(1.6vw, 3vh);
+    font-weight: 500;
+  }
+
+  .done h1 { font-size: min(12vw, 22vh); }
+  .done .timer { display: none; }
+
+  /* Portrait/narrow (e.g. checking on a phone) */
+  @media (max-aspect-ratio: 1/1) {
+    .timer { grid-template-columns: repeat(2, 1fr); }
+    h1 { font-size: 11vw; }
+    .value { font-size: 16vw; }
+    .label { font-size: 3.5vw; }
+    footer { font-size: 3.2vw; }
+  }
+</style>
+</head>
+<body>
+<canvas id="spray" aria-hidden="true"></canvas>
+
+<main id="app">
+  <svg class="logo" viewBox="0 0 828 300" role="img" aria-label="Elari">
+    <g fill="currentColor">
+      <path d="M179.204 239.674c-1.308 21.522-23.545 60.327-80.119 60.327S0 260.218 0 201.196 44.8 105 97.123 104.674c46.763-.326 77.503 22.174 78.157 56.74.654 43.043-81.427 63.26-96.142 68.152 10.464 14.021 25.18 22.174 43.492 22.174 19.621 0 34.991-7.826 41.858-17.283 5.559-5.543 15.043-3.261 14.389 5.544zM62.46 168.914c0 10.434 1.308 20.869 3.597 30 7.521.326 14.388 0 19.620-.653 17.332-3.261 26.816-15.326 26.816-42.065-.327-17.282-10.138-30.978-23.218-30.978-16.024 0-26.815 17.935-26.815 43.696M198.825 288.587v-1.63c0-11.413 15.369-15.652 15.369-33.587V74.674c0-18.26-15.369-23.478-15.369-33.260v-1.631c0-4.240 3.597-6.196 8.502-9.130l59.189-28.696c11.119-5.544 17.986 1.304 17.986 8.152V253.37c0 17.935 17.332 22.174 17.332 33.587v1.63c0 4.565-3.924 7.500-9.483 7.500h-84.697c-5.559 0-9.156-2.608-9.156-7.500zM528.782 285.652c0 10.109-22.891 13.044-44.474 13.044-23.545 0-34.990-4.566-37.934-18.913C438.199 291.196 422.502 300 396.668 300c-41.858 0-74.232-19.239-74.232-59.348s33.356-59.674 70.635-59.674c16.351 0 29.758 3.913 39.569 9.783v-1.305c-4.578-46.304-7.521-66.195-27.796-66.195-27.143 0-16.024 52.500-51.015 52.500-16.350 0-27.469-10.109-27.469-25.435 0-31.957 38.588-45.652 78.484-45.652 52.649 0 88.947 30.652 95.488 78.913l8.502 70.109c3.597 27.717 19.948 21.195 19.948 31.956m-90.256-33.913-1.635-17.935c-2.616-23.478-13.081-32.608-24.199-32.608s-19.948 10.434-19.948 26.739c0 27.717 9.484 52.174 25.507 52.174 13.081 0 20.275-15 20.275-28.044zM710.275 143.152c0 19.566-7.521 36.848-30.085 36.848-35.645 0-19.621-36.848-39.242-36.848-12.427 0-14.389 20.218-14.389 37.500v72.718c0 17.935 20.929 22.826 20.929 33.587v1.630c0 4.565-3.924 7.500-9.483 7.500h-84.370c-5.559 0-9.483-2.608-9.483-7.500v-1.630c0-11.087 15.696-15.652 15.696-33.587v-77.935c0-18.261-18.966-19.891-18.966-31.304v-1.305c0-4.565 3.270-8.152 9.156-11.413l55.265-25.761c10.138-4.565 14.062.653 14.062 8.479v28.695c8.502-25.108 27.142-38.804 54.284-38.804 23.218 0 36.953 16.956 36.953 38.804zM724.336 288.587v-1.631c0-11.413 15.697-15.978 15.697-33.913v-74.347c0-17.935-15.697-23.479-15.697-32.935v-1.631c0-4.239 3.598-6.195 9.157-9.130l59.189-29.022c11.119-5.543 17.659.652 17.659 8.152v138.587c0 17.935 17.659 22.826 17.659 33.913v1.631c0 4.565-3.924 7.500-9.810 7.500h-84.370c-5.886 0-9.484-2.609-9.484-7.500zm6.541-242.283c0-22.174 17.985-39.130 45.128-39.130 27.142 0 44.801 16.956 44.801 39.130s-17.986 39.130-44.801 39.130-45.128-17.282-45.128-39.130"/>
+      <path d="M55.593 192.391s55.265 3.587 56.9-38.478c.981-27.391 7.521 55.109 7.521 55.109H51.341l4.252-16.305z"/>
+    </g>
+  </svg>
+
+  <section class="centre">
+    <h1 id="title"></h1>
+    <div class="timer">
+      <div class="unit"><div class="value" id="d"></div><div class="label" id="ld">days</div></div>
+      <div class="unit"><div class="value" id="h"></div><div class="label" id="lh">hours</div></div>
+      <div class="unit"><div class="value" id="m"></div><div class="label" id="lm">minutes</div></div>
+      <div class="unit"><div class="value" id="s"></div><div class="label" id="ls">seconds</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <span id="date"></span>
+    <span id="sub"></span>
+  </footer>
+</main>
+
+<script>
+  /* ================= SETTINGS =================
+     Change the defaults here, or pass them in the URL:
+     ?date=2026-12-18T16:00&title=Almost%20time%20for%20the%20Christmas%20party&theme=dark
+  */
+  var CONFIG = {
+    date: '2027-01-01T00:00',            // local time (YYYY-MM-DDTHH:MM)
+    title: 'Almost there',
+    done: "It's time!",
+    text: '',                             // small text bottom right
+    theme: 'light'                        // 'light' or 'dark'
+  };
+  /* ============================================ */
+
+  var q = new URLSearchParams(location.search);
+  ['date', 'title', 'done', 'text', 'theme'].forEach(function (k) {
+    if (q.get(k)) CONFIG[k] = q.get(k);
+  });
+
+  var target = new Date(CONFIG.date);
+  var $ = function (id) { return document.getElementById(id); };
+
+  document.documentElement.dataset.theme = CONFIG.theme;
+  $('title').textContent = CONFIG.title;
+  $('sub').textContent = CONFIG.text;
+  $('date').textContent = isNaN(target) ? 'Invalid date: ' + CONFIG.date :
+    target.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) +
+    ' · ' + target.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  /* ---------- Brand shape spray ----------
+     Each shape is a group of circles that melt together (metaballs). The core is solid;
+     towards the edge every pixel is randomly on or off, which gives the sprayed grain.
+     Colour runs from `from` to `to` along the shape, also grainy. Positions are
+     fractions of the screen: [x, y, radius (relative to the height)]. */
+  var SHAPES = {
+    light: [
+      { from: '#FEFA7C', to: '#FFFFFF', dir: [-1, -0.4], circles: [[0.80, 0.92, 0.36], [0.97, 0.62, 0.26], [0.60, 1.10, 0.24]] },
+      { from: '#9EBDFF', to: '#AC8BF3', dir: [-1, 0.6], circles: [[0.90, 0.02, 0.20], [0.73, -0.06, 0.14]] }
+    ],
+    dark: [
+      { from: '#CCB5FF', to: '#FEFA7C', dir: [-1, -0.5], circles: [[0.80, 0.92, 0.36], [0.97, 0.62, 0.26], [0.60, 1.10, 0.24]] },
+      { from: '#587CD2', to: '#9EBDFF', dir: [-1, 0.6], circles: [[0.90, 0.02, 0.20], [0.73, -0.06, 0.14]] }
+    ]
+  };
+
+  function hex(c) { return [1, 3, 5].map(function (i) { return parseInt(c.substr(i, 2), 16); }); }
+  function smooth(a, b, x) { x = Math.min(1, Math.max(0, (x - a) / (b - a))); return x * x * (3 - 2 * x); }
+
+  function drawSpray() {
+    var canvas = $('spray');
+    var grain = Math.max(1, innerHeight / 540);      // size of one grain: 2px on a 1080p screen
+    var W = Math.ceil(innerWidth / grain), H = Math.ceil(innerHeight / grain);
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    var out = ctx.createImageData(W, H), px = out.data;
+    var mask = document.createElement('canvas');
+    mask.width = W; mask.height = H;
+    var m = mask.getContext('2d');
+
+    (SHAPES[CONFIG.theme] || SHAPES.light).forEach(function (shape) {
+      // Blurred mask via an offset shadow (works in every browser)
+      m.clearRect(0, 0, W, H);
+      m.shadowColor = '#fff';
+      m.shadowBlur = H * 0.08;
+      m.shadowOffsetX = W * 2;
+      m.fillStyle = '#fff';
+      shape.circles.forEach(function (c) {
+        m.beginPath();
+        m.arc(c[0] * W - W * 2, c[1] * H, c[2] * H, 0, Math.PI * 2);
+        m.fill();
+      });
+      var a = m.getImageData(0, 0, W, H).data;
+      var c1 = hex(shape.from), c2 = hex(shape.to);
+      var dx = shape.dir[0], dy = shape.dir[1], len = Math.hypot(dx, dy);
+      dx /= len; dy /= len;
+      // Range of the colour gradient across the shape
+      var lo = Infinity, hi = -Infinity;
+      shape.circles.forEach(function (c) {
+        var p = c[0] * W * dx + c[1] * H * dy, r = c[2] * H;
+        lo = Math.min(lo, p - r); hi = Math.max(hi, p + r);
+      });
+
+      for (var y = 0; y < H; y++) {
+        for (var x = 0; x < W; x++) {
+          var i = (y * W + x) * 4;
+          var v = a[i + 3] / 255;
+          if (v < 0.05) continue;
+          if (smooth(0.15, 0.55, v) < Math.random()) continue;       // sprayed edge
+          var t = smooth(0.15, 0.85, ((x * dx + y * dy) - lo) / (hi - lo));
+          var c = t > Math.random() ? c2 : c1;                    // grainy colour blend
+          px[i] = c[0]; px[i + 1] = c[1]; px[i + 2] = c[2]; px[i + 3] = 255;
+        }
+      }
+    });
+    ctx.putImageData(out, 0, 0);
+  }
+  drawSpray();
+  var resizeTimer;
+  addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(drawSpray, 200); });
+
+  var previous = {};
+  function set(id, n, min) {
+    var str = String(n).padStart(min, '0');
+    if (previous[id] === str) return;
+    previous[id] = str;
+    $(id).innerHTML = str.split('').map(function (c) { return '<span>' + c + '</span>'; }).join('');
+  }
+
+  function tick() {
+    var rest = Math.max(0, target - Date.now());
+    if (isNaN(rest)) return;
+    var sec = Math.floor(rest / 1000);
+    var d = Math.floor(sec / 86400);
+    var h = Math.floor(sec % 86400 / 3600);
+    var m = Math.floor(sec % 3600 / 60);
+    var s = sec % 60;
+    set('d', d, 2);
+    set('h', h, 2);
+    set('m', m, 2);
+    set('s', s, 2);
+    $('ld').textContent = d === 1 ? 'day' : 'days';
+    $('lh').textContent = h === 1 ? 'hour' : 'hours';
+    $('lm').textContent = m === 1 ? 'minute' : 'minutes';
+    $('ls').textContent = s === 1 ? 'second' : 'seconds';
+
+    if (rest === 0) {
+      $('app').classList.add('done');
+      $('title').textContent = CONFIG.done;
+      return;
+    }
+    // Tick exactly on the next second boundary so the clock never drifts
+    setTimeout(tick, (rest % 1000) || 1000);
+  }
+  tick();
+
+  // Keep the screen awake (modern browsers, https only)
+  function stayAwake() {
+    if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(function () {});
+  }
+  stayAwake();
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') stayAwake();
+  });
+
+  // Hide the mouse cursor after 3 seconds of no movement
+  var t;
+  function move() {
+    document.body.classList.remove('idle');
+    clearTimeout(t);
+    t = setTimeout(function () { document.body.classList.add('idle'); }, 3000);
+  }
+  document.addEventListener('mousemove', move);
+  move();
+
+  // Double-click = fullscreen
+  document.addEventListener('dblclick', function () {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(function () {});
+    else document.exitFullscreen();
+  });
+
+  // Reload every hour so changes on the server reach the TV automatically
+  setTimeout(function () { location.reload(); }, 3600 * 1000);
+</script>
+</body>
+</html>
