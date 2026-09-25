@@ -13,6 +13,7 @@
   :root {
     --lilac: #CCB5FF;
     --citrus: #FEFA7C;
+    --denim: #587CD2;
     --black: #000000;
     --ink: #141414;
     --white: #FFFFFF;
@@ -88,6 +89,9 @@
   :root[data-theme="dark"] .unit { box-shadow: none; }
   .unit:first-child { background: var(--accent-bg); color: var(--accent-fg); }
   .unit:first-child .label { color: var(--accent-fg); opacity: .75; }
+  .unit:nth-child(2) { background: var(--citrus); color: var(--black); }
+  .unit:nth-child(3) { background: var(--denim); color: var(--black); }
+  .unit:nth-child(2) .label, .unit:nth-child(3) .label { color: var(--black); opacity: .75; }
 
   .value {
     font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
