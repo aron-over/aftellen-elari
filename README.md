@@ -15,7 +15,7 @@ https://aron-over.github.io/aftellen-elari/?date=2026-12-18T16:00&title=Almost%2
 |---|---|---|
 | `date` | `2026-12-18T16:00` | Target moment in local time |
 | `title` | `Almost there` | Large heading |
-| `done` | `Finally Elari!` | Text shown when the countdown reaches 0 |
+| `done` | `Happy Elari!` | Text shown when the countdown reaches 0 |
 | `text` | `Utrecht office` | Small text bottom right |
 | `theme` | `light` / `dark` | Colour theme |
 
