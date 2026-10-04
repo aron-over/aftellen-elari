@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Countdown · Elari</title>
+<title>Nova starts in... · Elari</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,7 @@
     --ink: #141414;
     --white: #FFFFFF;
 
-    --bg: var(--lilac);
+    --bg: var(--citrus);
     --fg: var(--ink);
     --tile: var(--white);
     --muted: #5c5c5c;
@@ -174,8 +174,8 @@
      ?date=2026-12-18T16:00&title=Almost%20time%20for%20the%20Christmas%20party&theme=dark
   */
   var CONFIG = {
-    date: '2026-10-01T09:00',            // local time (YYYY-MM-DDTHH:MM)
-    title: 'Almost there',
+    date: '2026-10-12T13:00:00+02:00',   // local time (YYYY-MM-DDTHH:MM)
+    title: 'Nova starts in...',
     done: 'Happy Elari!',
     text: '',                             // small text bottom right
     theme: 'light'                        // 'light' or 'dark'
@@ -194,8 +194,8 @@
   $('title').textContent = CONFIG.title;
   $('sub').textContent = CONFIG.text;
   $('date').textContent = isNaN(target) ? 'Invalid date: ' + CONFIG.date :
-    target.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) +
-    ' · ' + target.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    target.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Amsterdam' }) +
+    ' · ' + target.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Amsterdam' });
 
   /* ---------- Brand shape spray ----------
      Each shape is a group of circles that melt together (metaballs). The core is solid;
@@ -204,10 +204,10 @@
      fractions of the screen: [x, y, radius (relative to the height)]. */
   var SHAPES = {
     light: [
-      { from: '#FEFA7C', to: '#FEFA7C', dir: [-1, -0.4], circles: [[0.90, 1.02, 0.36], [1.04, 0.74, 0.28], [0.70, 1.18, 0.22]] }
+      { from: '#CCB5FF', to: '#CCB5FF', dir: [-1, -0.4], circles: [[0.90, 1.02, 0.36], [1.04, 0.74, 0.28], [0.70, 1.18, 0.22]] }
     ],
     dark: [
-      { from: '#FEFA7C', to: '#FEFA7C', dir: [-1, -0.4], circles: [[0.90, 1.02, 0.36], [1.04, 0.74, 0.28], [0.70, 1.18, 0.22]] }
+      { from: '#CCB5FF', to: '#CCB5FF', dir: [-1, -0.4], circles: [[0.90, 1.02, 0.36], [1.04, 0.74, 0.28], [0.70, 1.18, 0.22]] }
     ]
   };
 
